@@ -8,6 +8,8 @@ startTime = time.time()
 sampledBab_csv = sys.argv[1]
 df = pd.read_csv(sampledBab_csv)
 
+depthLimit = int(sys.argv[2])
+
 def getClearDataFrame(dataFrame):
 	index = 0
 	while True:
@@ -56,7 +58,8 @@ class NunchiTree():
 		self.depth = depth + 1
 	def train(self, dataFrame):
 		global featureType
-		if entropy(dataFrame) < 0.05 or len(dataFrame) <= 10:
+		global depthLimit
+		if entropy(dataFrame) < 0.05 or len(dataFrame) <= 10 or self.depth > depthLimit:
 			if len(dataFrame[dataFrame.state == 2]) > len(dataFrame[dataFrame.state == 3]):
 				self.result = 2
 			else:
@@ -108,7 +111,7 @@ class NunchiTree():
 			return self.subTree[1].classify(features)
 
 def evaluateTree(tree, testSet):
-	print ('Start Evaluation with test set (size: %d)' % len(testSet))
+	# print ('=== Evaluation with test set (size: %d)' % len(testSet))
 	truePositive = 0
 	trueNegative = 0
 	falsePositive = 0
@@ -132,36 +135,49 @@ def evaluateTree(tree, testSet):
 			else:
 				invalid +=1
 		total += 1
-	print ('Evaluation finish.')
-	print ('[Evaluation result]')
-	print ('True Positive: %d' % truePositive)
-	print ('True Negative: %d' % trueNegative)
-	print ('False Positive: %d' % falsePositive)
-	print ('False Negative: %d' % falseNegative)
-	print ('Recall(TP/TP+FN): %f' % (truePositive/(truePositive + falseNegative)))
-	print ('Precision(TP/TP+FP): %f' % (truePositive/(truePositive + falsePositive)))
+
+	print ('[TP: {0}, TN: {1}, FP: {2}, FN: {3}]'.format(truePositive, trueNegative, falsePositive, falseNegative))
+	print ('--- Recall(TP/TP+FN): %f' % (truePositive/(truePositive + falseNegative)))
+	print ('--- Precision(TP/TP+FP): %f' % (truePositive/(truePositive + falsePositive)))
 	if invalid > 0:
 		print ('Invalid: %d' % invalid)
 
+def validation(trainSet, testSet):
+	print ('Training with train set (size: %d)' % len(trainDataFrame))
+	tree = NunchiTree(0)
+	tree.train(trainSet)
+	# print ('Training finish.')
+	evaluateTree(tree,testSet)
+
 df = getClearDataFrame(df)
-df['light'] = df['light'].apply(lambda x: getLog(x)) # apply log for brightness
+df['light'] = df['light'].apply(lambda x: getLog(x)) # apply log for light feature
 df = df[df.state > 1]
 
-# trainBound = int(len(df)*3/4)
-# trainDataFrame = df[0 : trainBound]
-# testDataFrame = df[trainBound : ]
+trainBound1 = int(len(df)/3)
+trainBound2 = int(len(df)*2/3)
+
+# trainDataFrame = df[0::2]
+# testDataFrame = df[1::2]
 # testDataFrame.index = range(len(testDataFrame))
-trainDataFrame = df[0::2]
-testDataFrame = df[1::2]
-testDataFrame.index = range(len(testDataFrame))
 
 print ("="*70)
 print ('NunchitBab Analysis from "' + sampledBab_csv + '" (length:%d)' % len(df))
+print ('Depth limit: %d' % depthLimit)
 print ("="*70)
-print ('Start Training with train set (size: %d)' % len(trainDataFrame))
-tree = NunchiTree(0)
-tree.train(trainDataFrame)
-print ('Training finish.')
-evaluateTree(tree, testDataFrame)
+print ('[Train: [{0}:{1}] | Test: [{1}:{2}]'.format(0,trainBound2,len(df)))
+trainDataFrame = df[0 : trainBound2]
+testDataFrame = df[trainBound2 : ]
+testDataFrame.index = range(len(testDataFrame))
+validation(trainDataFrame, testDataFrame)
+print ('\n[Train: [{0}:{1},{2}:{3}] | Test: [{1}:{2}]'.format(0,trainBound1,trainBound2,len(df)))
+trainDataFrame = df[0 : trainBound1].append(df[trainBound2:])
+testDataFrame = df[trainBound1 : trainBound2]
+testDataFrame.index = range(len(testDataFrame))
+validation(trainDataFrame, testDataFrame)
+print ('\n[Train: [{1}:{2}] | Test: [{0}:{1}]'.format(0,trainBound1,len(df)))
+trainDataFrame = df[trainBound1 : ]
+testDataFrame = df[0 : trainBound1]
+testDataFrame.index = range(len(testDataFrame))
+validation(trainDataFrame, testDataFrame)
 print ('\n(execution time: %d sec)' %(time.time() - startTime))
 print ("="*70)
