@@ -4,7 +4,7 @@ for depth in $*
 do
 if [ $depth != $1 ]
 then
-python NunchitBabAnalysis.py sample/$USER-bab-sample-60000.csv $depth
+#python NunchitBabAnalysis.py sample/$USER-bab-sample-60000.csv $depth
 python NunchitBabAnalysis.py sample/$USER-bab-sample-180000.csv $depth
 python NunchitBabAnalysis.py sample/$USER-bab-sample-300000.csv $depth
 fi

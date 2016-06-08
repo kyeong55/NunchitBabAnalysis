@@ -50,7 +50,7 @@ def validation(trainSet, testSet):
 			elif predictY[index] == 3:
 				trueNegative += 1
 			else:
-				akward += 1
+				invalid += 1
 		else:
 			if predictY[index] == 2:
 				falsePositive += 1
@@ -76,17 +76,20 @@ trainBound2 = int(len(df)*2/3)
 print ("="*75)
 print ('Nunchi Decision Tree from "' + sampledBab_csv + '" (length:%d)' % len(df))
 print ("="*75)
-print ('[Train: [{0}:{1}] | Test: [{1}:{2}]'.format(0,trainBound2,len(df)))
+
+print ('Train: [{0}:{1}] | Test: [{1}:{2}]'.format(0,trainBound2,len(df)))
 trainDataFrame = df[0 : trainBound2]
 testDataFrame = df[trainBound2 : ]
 testDataFrame.index = range(len(testDataFrame))
 validation(trainDataFrame, testDataFrame)
-print ('\n[Train: [{0}:{1},{2}:{3}] | Test: [{1}:{2}]'.format(0,trainBound1,trainBound2,len(df)))
+
+print ('\nTrain: [{0}:{1},{2}:{3}] | Test: [{1}:{2}]'.format(0,trainBound1,trainBound2,len(df)))
 trainDataFrame = df[0 : trainBound1].append(df[trainBound2:])
 testDataFrame = df[trainBound1 : trainBound2]
 testDataFrame.index = range(len(testDataFrame))
 validation(trainDataFrame, testDataFrame)
-print ('\n[Train: [{1}:{2}] | Test: [{0}:{1}]'.format(0,trainBound1,len(df)))
+
+print ('\nTrain: [{1}:{2}] | Test: [{0}:{1}]'.format(0,trainBound1,len(df)))
 trainDataFrame = df[trainBound1 : ]
 testDataFrame = df[0 : trainBound1]
 testDataFrame.index = range(len(testDataFrame))

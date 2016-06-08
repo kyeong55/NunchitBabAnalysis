@@ -6,7 +6,7 @@ bab_csv = sys.argv[1] #"data/tg-bab-01.csv"
 sample_csv = sys.argv[2] #"sample/tg-bab-sample-01.csv"
 beforeInterval = int(sys.argv[3])
 
-df = pd.read_csv(bab_csv)
+df = pd.read_csv(bab_csv, encoding='utf-8')
 
 sampleTime = 10*1000 # 10sec
 # beforeInterval = 60*1000 # 1min
